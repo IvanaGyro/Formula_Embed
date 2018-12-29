@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Formula Embed</title>
+    <style>
+        button {
+        background-color: rgb(187, 187, 187);
+        border: 1px solid rgb(133, 133, 133);
+        border-radius: 4px;
+        color: black;
+        cursor: pointer;
+        font-size: 0.7em;
+        margin: 0;
+        padding: 0.4em;
+        -webkit-transition-duration: 0.4s; /* Safari */
+        transition-duration: 0.4s;
+    }
+
+    button:hover {
+        background-color: gray;
+        border: 1px solid gray;
+        box-shadow: 2px 4px 6px 0 rgba(0,0,0,0.24), 3px 6px 8px 0 rgba(0,0,0,0.19);
+        color: white;
+        
+    }
+</style>
+</head>
+
+<body>
+    <p id="formula"></p>
+</body>
+<script type="text/javascript">
+    window.MathJax = {
+        jax: ["input/TeX", "input/MathML", "output/SVG", "output/PreviewHTML"],
+        extensions: ["tex2jax.js", "mml2jax.js", "MathMenu.js", "MathZoom.js", "AssistiveMML.js",
+            "a11y/accessibility-menu.js"
+        ],
+        showMathMenu: true,
+        showProcessingMessages: false,
+        messageStyle: "none",
+        SVG: {
+            useGlobalCache: false
+        },
+        TeX: {
+            extensions: ["AMSmath.js", "AMSsymbols.js", "autoload-all.js", "noErrors.js", "noUndefined.js"]
+        },
+        AuthorInit: function () {
+            MathJax.Hub.Register.StartupHook("Begin", init);
+            MathJax.Hub.Register.StartupHook("End", addEvent);
+        }
+    }
+
+    function init() {
+        const urlParams = new URLSearchParams(window.location.search);
+        formula = urlParams.get('formula');
+        title = urlParams.get('title');
+        var formulaElement = document.getElementById('formula');
+        formulaElement.innerHTML = formula;
+    }
+
+    function isiOS() {
+        return navigator.userAgent.match(/ipad|iphone/i);
+    }
+
+    function setClipboard(value) {
+        var tempInput = document.createElement("input");
+        tempInput.style = "position: absolute; left: -10000px; top: -10000px";
+        tempInput.value = value;
+        document.body.appendChild(tempInput);
+        if (isiOS()) {
+            tempInput.mouseup = function (event) {
+                event.stop();
+            }
+            tempInput.focus();
+            tempInput.setSelectionRange(0, 99999);
+        } else {
+            tempInput.select();
+        }
+
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+    }
+
+    function copyTex() {
+        setClipboard(formula);
+    }
+
+    // Link: http://bl.ocks.org/curran/7cf9967028259ea032e8
+    function svgDataURL(svg) {
+        var svgAsXML = (new XMLSerializer).serializeToString(svg);
+        return "data:image/svg+xml," + encodeURIComponent(svgAsXML);
+    }
+
+    function downloadDataURL(dataURL) {
+        var dl = document.createElement("a");
+        document.body.appendChild(dl); // This line makes it work in Firefox.
+        dl.setAttribute("href", dataURL);
+        dl.setAttribute("download", title + ".svg");
+        dl.click();
+    }
+
+    function downloadSVG() {
+        var formulaElement = document.getElementById("formula");
+
+        downloadDataURL(svgDataURL(formulaElement.getElementsByTagName("svg")[0]));
+    }
+
+    // init();
+</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" async></script>
+<script>
+    async function addEvent() {
+        var formulaBlock = await
+
+        function () {
+            return new Promise((resolve, reject) => {
+                var check = setInterval(() => {
+                    var formulaBlock = document.getElementsByClassName("MathJax_SVG_Display")[0];
+                    if (formulaBlock !== undefined) {
+                        clearInterval(check);
+                        resolve(formulaBlock);
+                    }
+                }, 100);
+            });
+        }();
+
+        var texbutton = document.createElement("button");
+        texbutton.textContent = "Copy Tex";
+        texbutton.onclick = copyTex;
+        texbutton.style.display = "none";
+        var svgbutton = document.createElement("button");
+        svgbutton.textContent = "Download SVG";
+        svgbutton.onclick = downloadSVG;
+        svgbutton.style.display = "none";
+
+        var div = document.createElement("div");
+        div.style.display = "flex";
+        div.style.position = "absolute";
+        div.style.right = "0";
+        div.style.bottom = "0";
+        div.style["z-index"] = "1";
+        div.appendChild(texbutton);
+        div.appendChild(svgbutton);
+
+        var formulaArea = document.getElementsByClassName("MathJax_SVG")[0];
+        formulaArea.appendChild(div);
+        formulaArea.onmouseenter = function (event) {
+            var buttons = this.getElementsByTagName("button");
+            for (let button of buttons) {
+                button.style.display = "";
+            }
+        }
+        formulaArea.onmouseleave = function (event) {
+            var buttons = this.getElementsByTagName("button");
+            for (let button of buttons) {
+                button.style.display = "none";
+            }
+        }
+
+    }
+</script>
+
+</html>

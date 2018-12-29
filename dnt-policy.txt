@@ -1,0 +1,6 @@
+Formula Embed's Do Not Track Policy
+
+Formula Embed provides the service by static pages. We do not collect any
+users' data or identification and we do not use cookies. All of the data,
+except the static pages, is created in the client side in runtime.
+ 
